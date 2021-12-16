@@ -1,0 +1,83 @@
+--INSERT
+1. Insert into books value (100002,'Happy Money', 'Ken Honda');
+
+2. insert 100.000 records 
+ALTER TABLE `books`KEYS;
+LOAD DATA INFILE 'D:/Downloads/pouchdb/book.csv'
+INTO TABLE `books`
+CHARACTER SET UTF8
+FIELDS TERMINATED BY ','
+LINES TERMINATED BY '\n'; 
+
+3.Insert 1.000.000 records
+ALTER TABLE `customers`KEYS;
+LOAD DATA INFILE 'D:/Downloads/pouchdb/customer.csv'
+INTO TABLE `customers`
+CHARACTER SET UTF8
+FIELDS TERMINATED BY ','
+LINES TERMINATED BY '\n'; 
+
+--UPDATE: cập nhật thông tin tác giả sách
+DELIMITER $$
+CREATE PROCEDURE updateOrderdetail(IN orderNum INT(11))
+BEGIN
+	DECLARE i INT(11);
+    SET i = 1;
+	loop_label: LOOP
+    	IF i > orderNum THEN
+        	LEAVE loop_label;
+        ELSE 
+        	UPDATE orderDetails
+		SET quantityOrdered = 100
+            WHERE orderNumber = i;
+        END IF;
+        SET i = i + 1;
+        ITERATE loop_label;
+        END LOOP;     
+END $$
+DELIMITER ;
+
+--DELETE: xóa các bản ghi chi tiết đơn hàng
+
+DELIMITER $$
+CREATE PROCEDURE deleteOrderDetail(IN number INT(11))
+BEGIN
+	DECLARE i INT(11);
+    	SET i = 1;
+	loop_label: LOOP
+    	IF i > number THEN
+        	LEAVE loop_label;
+        ELSE 
+        	DELETE FROM orderdetails
+            WHERE orderNumber = i;
+        END IF;
+        SET i = i + 1;
+        ITERATE loop_label;
+        END LOOP;     
+END $$
+DELIMITER ;
+
+--SEARCH
+1. Tìm kiếm thông tin sách có id = 1010
+Select * 
+from books 
+where bookID = 1010;
+2. Tìm kiếm những cuốn sách có tên "The Lord of The Rings"
+SELECT *
+FROM books WHERE title = 'The Lord of The Rings';
+
+3. Tìm tổng số đơn hàng của một khách hàng có customerNumber = 22222 (join 2 bảng)
+SELECT COUNT(ordernumber) as sumOrder
+FROM orders
+JOIN customers ON  orders.customerNumber = customers.customerNumber
+WHERE customerNumber  = 22222 
+GROUP BY customerNumber;
+
+
+4. Tìm tổng số quantityOrdered của khách hàng có customerNumber = 92925 (join 3 bảng)
+SELECT SUM(quantityOrdered) as sum
+FROM orderdetails 
+JOIN orders ON  orders.orderNumber= orderdetails.orderNumber
+JOIN customers ON orders.customerNumber = = customers.customerNumber
+WHERE customerNumber  = 92925
+GROUP BY customerNumber;
